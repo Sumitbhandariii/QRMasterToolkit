@@ -16,30 +16,17 @@ jobs:
         with:
           node-version: 20.x
 
-      - name: Install EAS CLI Globally
-        run: npm install -g eas-cli
-
       - name: Install dependencies perfectly
         run: |
           npm install --legacy-peer-deps
           npm install ajv ajv-keywords --save-dev --legacy-peer-deps
 
-      - name: Force Expo Config Verification
-        run: |
-          npx expo config --json || true
+      - name: 🚨 CATCH THE HIDDEN ERROR 🚨
+        run: npx expo config
 
       - name: Build Android locally on GitHub
         run: |
-          eas init --id 5c735bd2-34f0-44b6-9015-92dc33311ac5 --non-interactive --force || true
           eas build --platform android --non-interactive --profile preview --local --output my-app.apk
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          NODE_ENV: production
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Android-APK
-          path: my-app.apk
           
