@@ -21,10 +21,9 @@ jobs:
 
       - name: Build Android
         run: |
-          npx eas-cli build --platform android --non-interactive --local --output my-app.apk
+          npx eas-cli build --platform android --non-interactive --profile preview --local --output my-app.apk
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          # यह लाइन Kotlin/Gradle के एरर को कम करने में मदद करेगी
           GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -Dkotlin.daemon.jvm.options=-Xmx2048m"
 
       - name: Upload APK
