@@ -1,10 +1,9 @@
 {
   "expo": {
     "name": "QR Master Toolkit",
-    "slug": "qr-master-toolkit",
+    "slug": "qrmaster-toolkit",
     "version": "1.0.0",
     "owner": "techeditz8",
-    "projectId": "5c735bd2-34f0-44b6-9015-92dc33311ac5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "qrmastertoolkit",
@@ -59,6 +58,11 @@
           "iosAppId": "ca-app-pub-8212461864193378~4599440732"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "5c735bd2-34f0-44b6-9015-92dc33311ac5"
+      }
+    }
   }
 }
