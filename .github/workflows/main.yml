@@ -16,6 +16,9 @@ jobs:
         with:
           node-version: 20.x
 
+      - name: 🧹 Remove conflicting lock files
+        run: rm -f pnpm-lock.yaml yarn.lock
+
       - name: Install dependencies perfectly
         run: |
           npm install --legacy-peer-deps
