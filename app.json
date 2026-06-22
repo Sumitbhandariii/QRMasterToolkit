@@ -5,7 +5,6 @@
     "version": "1.0.0",
     "owner": "techeditz8",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "scheme": "qrmastertoolkit",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
@@ -15,26 +14,11 @@
     },
     "android": {
       "package": "com.qrmaster.toolkit",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.FLASHLIGHT",
-        "android.permission.INTERNET",
-        "android.permission.ACCESS_NETWORK_STATE",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.ACCESS_MEDIA_LOCATION"
-      ]
+      "adaptiveIcon": null
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/favicon.png"
+      "output": "static"
     },
     "plugins": [
       [
