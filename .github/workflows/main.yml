@@ -26,7 +26,6 @@ jobs:
       - name: Install dependencies perfectly
         run: |
           npm install --legacy-peer-deps
-          npm install ajv ajv-keywords --save-dev --legacy-peer-deps
 
       - name: Build Android locally on GitHub
         run: |
