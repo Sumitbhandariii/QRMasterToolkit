@@ -16,29 +16,16 @@ jobs:
         with:
           node-version: 20.x
 
-      - name: 🧹 Remove conflicting lock files
-        run: rm -f pnpm-lock.yaml yarn.lock
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
 
-      - name: Install dependencies perfectly
+      - name: Build Android
         run: |
-          npm install --legacy-peer-deps
-          npm install ajv ajv-keywords --save-dev --legacy-peer-deps
-
-      - name: Force Install Google Ads Plugin
-        run: |
-          npm install react-native-google-mobile-ads --legacy-peer-deps
-
-      - name: Verify Expo Config Now
-        run: npx expo config
-
-      - name: Build Android locally on GitHub
-        run: |
-          npx eas-cli init --id 5c735bd2-34f0-44b6-9015-92dc33311ac5 --non-interactive --force
-          npx eas-cli build --platform android --non-interactive --profile preview --local --output my-app.apk
+          npx eas-cli build --platform android --non-interactive --local --output my-app.apk
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          NODE_ENV: production
-          EXPO_SKIP_MANIFEST_VALIDATION: 1
+          # यह लाइन Kotlin/Gradle के एरर को कम करने में मदद करेगी
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -Dkotlin.daemon.jvm.options=-Xmx2048m"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
