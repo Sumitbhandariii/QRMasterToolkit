@@ -7,28 +7,19 @@
     "projectId": "5c735bd2-34f0-44b6-9015-92dc33311ac5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "qrmastertoolkit",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": ["**/*"],
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.qrmaster.toolkit",
-      "infoPlist": {
-        "NSCameraUsageDescription": "QR Master needs camera access to scan QR codes and barcodes.",
-        "NSPhotoLibraryUsageDescription": "QR Master needs gallery access to scan QR codes from images.",
-        "NSPhotoLibraryAddUsageDescription": "QR Master needs permission to save generated QR codes to your photo library."
-      }
+      "bundleIdentifier": "com.qrmaster.toolkit"
     },
     "android": {
+      "package": "com.qrmaster.toolkit",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.qrmaster.toolkit",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_MEDIA_IMAGES",
@@ -40,6 +31,8 @@
       ]
     },
     "web": {
+      "bundler": "metro",
+      "output": "static",
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
