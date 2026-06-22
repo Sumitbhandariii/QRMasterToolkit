@@ -30,8 +30,16 @@ jobs:
 
       - name: Build Android locally on GitHub
         run: |
-          eas init --id 5c735bd2-34f0-44b6-9015-92dc33311ac5 --non-interactive --force
-          eas build --platform android --non-interactive --profile preview --local --output my-app.apk
+          npx eas-cli init --id 5c735bd2-34f0-44b6-9015-92dc33311ac5 --non-interactive --force
+          npx eas-cli build --platform android --non-interactive --profile preview --local --output my-app.apk
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          NODE_ENV: production
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Android-APK
+          path: my-app.apk
           
