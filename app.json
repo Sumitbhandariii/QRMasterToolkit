@@ -27,7 +27,9 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.FLASHLIGHT",
         "android.permission.INTERNET",
-        "android.permission.ACCESS_NETWORK_STATE"
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_MEDIA_LOCATION"
       ]
     },
     "web": {
@@ -54,9 +56,7 @@
         "react-native-google-mobile-ads",
         {
           "androidAppId": "ca-app-pub-8212461864193378~4599440732",
-          "iosAppId": "ca-app-pub-8212461864193378~4599440732",
-          "delayAppMeasurementInit": false,
-          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+          "iosAppId": "ca-app-pub-8212461864193378~4599440732"
         }
       ]
     ]
