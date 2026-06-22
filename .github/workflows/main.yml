@@ -21,11 +21,16 @@ jobs:
           npm install --legacy-peer-deps
           npm install ajv ajv-keywords --save-dev --legacy-peer-deps
 
-      - name: 🚨 CATCH THE HIDDEN ERROR 🚨
+      - name: Force Install Google Ads Plugin
+        run: |
+          npm install react-native-google-mobile-ads --legacy-peer-deps
+
+      - name: Verify Expo Config Now
         run: npx expo config
 
       - name: Build Android locally on GitHub
         run: |
+          eas init --id 5c735bd2-34f0-44b6-9015-92dc33311ac5 --non-interactive --force
           eas build --platform android --non-interactive --profile preview --local --output my-app.apk
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
