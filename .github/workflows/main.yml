@@ -33,11 +33,6 @@ jobs:
           eas build --platform android --non-interactive --profile preview --local --output my-app.apk
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Android-APK
-          path: my-app.apk
+          NODE_ENV: production
+          EXPO_NO_TELEMETRY: 1
           
