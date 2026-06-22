@@ -30,7 +30,6 @@ jobs:
 
       - name: Build Android locally on GitHub
         run: |
-          eas project:init --name "qr-master-toolkit" --non-interactive || true
           eas build --platform android --non-interactive --profile preview --local --output my-app.apk
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
