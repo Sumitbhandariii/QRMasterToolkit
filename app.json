@@ -1,24 +1,44 @@
 {
   "expo": {
     "name": "QR Master Toolkit",
-    "slug": "qrmaster-toolkit",
+    "slug": "qr-master-toolkit",
     "version": "1.0.0",
-    "owner": "techeditz8",
     "orientation": "portrait",
-    "scheme": "qrmastertoolkit",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.qrmaster.toolkit"
+      "bundleIdentifier": "com.qrmaster.toolkit",
+      "infoPlist": {
+        "NSCameraUsageDescription": "QR Master needs camera access to scan QR codes and barcodes.",
+        "NSPhotoLibraryUsageDescription": "QR Master needs gallery access to scan QR codes from images.",
+        "NSPhotoLibraryAddUsageDescription": "QR Master needs permission to save generated QR codes to your photo library."
+      }
     },
     "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
       "package": "com.qrmaster.toolkit",
-      "adaptiveIcon": null
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.FLASHLIGHT",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
-      "bundler": "metro",
-      "output": "static"
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       [
@@ -39,14 +59,11 @@
         "react-native-google-mobile-ads",
         {
           "androidAppId": "ca-app-pub-8212461864193378~4599440732",
-          "iosAppId": "ca-app-pub-8212461864193378~4599440732"
+          "iosAppId": "ca-app-pub-8212461864193378~4599440732",
+          "delayAppMeasurementInit": false,
+          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
         }
       ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "5c735bd2-34f0-44b6-9015-92dc33311ac5"
-      }
-    }
+    ]
   }
 }
