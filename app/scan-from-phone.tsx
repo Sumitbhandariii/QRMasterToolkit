@@ -8,6 +8,7 @@ import {
   ScrollView,
   Clipboard,
   Share,
+  Linking,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -22,6 +23,25 @@ import { Colors, Spacing, Radius, Shadow } from '@/constants/theme';
 import { useAlert } from '@/template';
 
 type ScanStatus = 'idle' | 'picking' | 'processing' | 'success' | 'error';
+
+function getOpenAction(content: string): { label: string; icon: string; url: string } | null {
+  if (!content) return null;
+  if (content.startsWith('http://') || content.startsWith('https://'))
+    return { label: 'Open in Browser', icon: 'open-in-browser', url: content };
+  if (content.startsWith('tel:'))
+    return { label: 'Call Number', icon: 'phone', url: content };
+  if (content.startsWith('mailto:'))
+    return { label: 'Open Email', icon: 'email', url: content };
+  if (content.startsWith('sms:') || content.startsWith('smsto:'))
+    return { label: 'Send SMS', icon: 'message', url: content.replace('smsto:', 'sms:') };
+  if (content.startsWith('geo:'))
+    return { label: 'Open Maps', icon: 'map', url: content };
+  if (content.startsWith('WIFI:'))
+    return { label: 'Connect to WiFi', icon: 'wifi', url: content };
+  if (content.startsWith('upi://') || content.startsWith('paytm://') || content.startsWith('phonepe://'))
+    return { label: 'Open Payment App', icon: 'payment', url: content };
+  return null;
+}
 
 export default function ScanFromPhoneScreen() {
   const insets = useSafeAreaInsets();
@@ -159,6 +179,19 @@ export default function ScanFromPhoneScreen() {
     } catch {}
   }, [result]);
 
+  const handleOpen = useCallback(async (url: string) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        showAlert('Cannot Open', 'Your device cannot handle this action.');
+      }
+    } catch {
+      showAlert('Error', 'Failed to open this link.');
+    }
+  }, [showAlert]);
+
   const handleReset = () => {
     setStatus('idle');
     setResult(null);
@@ -229,6 +262,19 @@ export default function ScanFromPhoneScreen() {
                 <Text style={styles.resultBtnTextSecondary}>Share</Text>
               </TouchableOpacity>
             </View>
+
+            {(() => {
+              const openAction = getOpenAction(result || '');
+              return openAction ? (
+                <TouchableOpacity
+                  style={styles.openActionBtn}
+                  onPress={() => handleOpen(openAction.url)}
+                >
+                  <MaterialIcons name={openAction.icon as any} size={20} color={Colors.white} />
+                  <Text style={styles.openActionText}>{openAction.label}</Text>
+                </TouchableOpacity>
+              ) : null;
+            })()}
 
             <TouchableOpacity style={styles.scanAnotherBtn} onPress={handleReset}>
               <MaterialIcons name="refresh" size={18} color={Colors.textSecondary} />
@@ -409,4 +455,15 @@ const styles = StyleSheet.create({
   retryBtnText: { fontSize: 15, fontWeight: '700', color: Colors.white },
   cancelLink: { paddingVertical: 8 },
   cancelLinkText: { fontSize: 14, color: Colors.textSecondary, fontWeight: '500' },
+  openActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 52,
+    borderRadius: Radius.lg,
+    backgroundColor: '#3B82F6',
+    ...Shadow.sm,
+  },
+  openActionText: { fontSize: 15, fontWeight: '700', color: Colors.white },
 });
