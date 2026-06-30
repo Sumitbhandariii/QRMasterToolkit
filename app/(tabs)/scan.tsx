@@ -5,12 +5,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  Vibration,
   Platform,
   Linking,
   AppState,
   AppStateStatus,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { CameraView, useCameraPermissions, CameraType } from 'expo-camera';
 import Animated, {
   useSharedValue,
@@ -155,6 +155,35 @@ function ScannedBadge({ visible }: { visible: boolean }) {
   );
 }
 
+// ─── Haptic feedback differentiated by code type ─────────────────────────────
+/** Barcode-type constants that are NOT QR codes */
+const BARCODE_TYPES = new Set([
+  'ean13', 'ean8', 'upc_a', 'upc_e',
+  'code39', 'code93', 'code128', 'codabar',
+  'datamatrix', 'itf14', 'pdf417', 'aztec',
+]);
+
+async function triggerHapticForCode(type: string, data: string): Promise<void> {
+  if (Platform.OS === 'web') return;
+  try {
+    const isWiFi = data.toUpperCase().startsWith('WIFI:');
+    if (isWiFi) {
+      // Long / notification-style buzz for WiFi — prompt user to connect
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else if (BARCODE_TYPES.has(type.toLowerCase())) {
+      // Double short buzz for product/retail barcodes
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      await new Promise(r => setTimeout(r, 110));
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else {
+      // Single medium buzz for QR codes
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+  } catch {
+    // Haptics not available on this device — silent fail
+  }
+}
+
 // ─── Main screen ───────────────────────────────────────────────────────────────
 export default function ScanScreen() {
   const insets = useSafeAreaInsets();
@@ -210,11 +239,8 @@ export default function ScanScreen() {
       setScanned(true);
       setSuccessFlash(true);
 
-      if (Platform.OS !== 'web') {
-        try {
-          Vibration.vibrate([0, 60, 40, 60]);
-        } catch {}
-      }
+      // Differentiated haptic: WiFi = notification, barcode = double, QR = single
+      triggerHapticForCode(type, data);
 
       try {
         const item = await addItem({
