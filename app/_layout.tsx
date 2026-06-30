@@ -4,10 +4,12 @@ import { AlertProvider } from '@/template';
 import { QRDataProvider } from '@/contexts/QRDataContext';
 import { useEffect } from 'react';
 import { AdManager } from '@/services/adManager';
+import { SoundManager } from '@/services/soundManager';
 
 export default function RootLayout() {
   useEffect(() => {
     AdManager.initialize();
+    SoundManager.init(); // pre-generate WAV tones so first scan plays instantly
   }, []);
 
   return (

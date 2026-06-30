@@ -32,6 +32,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useQRData } from '@/hooks/useQRData';
 import { Colors, Radius, Shadow } from '@/constants/theme';
 import { AdManager } from '@/services/adManager';
+import { SoundManager } from '@/services/soundManager';
 
 const { width } = Dimensions.get('window');
 const SCAN_AREA = width * 0.7;
@@ -78,42 +79,103 @@ function ScanLine() {
   );
 }
 
-// ─── Animated corner markers ───────────────────────────────────────────────────
+// ─── Animated corner markers with pulsing glow ────────────────────────────────
 function CornerMarkers({ success }: { success: boolean }) {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
+  // Glow pulse: continuously breathes when idle
+  const glowOpacity = useSharedValue(0.25);
+
+  useEffect(() => {
+    // Start breathing glow loop
+    glowOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.85, { duration: 1200, easing: Easing.inOut(Easing.sine) }),
+        withTiming(0.2, { duration: 1200, easing: Easing.inOut(Easing.sine) })
+      ),
+      -1,
+      false
+    );
+    return () => cancelAnimation(glowOpacity);
+  }, []);
 
   useEffect(() => {
     if (success) {
+      // On detection: spring-bounce scale + flash opacity
+      cancelAnimation(glowOpacity);
       scale.value = withSequence(
-        withSpring(1.15, { damping: 4, stiffness: 220 }),
+        withSpring(1.18, { damping: 4, stiffness: 220 }),
         withSpring(1, { damping: 8, stiffness: 180 })
       );
       opacity.value = withSequence(
-        withTiming(0.4, { duration: 80 }),
+        withTiming(0.35, { duration: 80 }),
         withTiming(1, { duration: 200 })
       );
+      glowOpacity.value = withTiming(1, { duration: 80 });
     }
   }, [success]);
 
-  const animStyle = useAnimatedStyle(() => ({
+  const containerStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
     opacity: opacity.value,
   }));
 
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+  }));
+
   const borderColor = success ? '#FFFFFF' : Colors.primary;
-  const c = (extra: object) => [
-    styles.corner,
-    extra,
-    { borderColor },
+  const glowColor = success ? '#FFFFFF' : Colors.primary;
+
+  type BorderStyle = {
+    borderTopWidth?: number; borderBottomWidth?: number;
+    borderLeftWidth?: number; borderRightWidth?: number;
+    borderTopLeftRadius?: number; borderTopRightRadius?: number;
+    borderBottomLeftRadius?: number; borderBottomRightRadius?: number;
+  };
+
+  const CORNERS: Array<{
+    wrapStyle: object;
+    glowStyle2: object;
+    borderStyle: BorderStyle;
+  }> = [
+    {
+      wrapStyle: styles.cornerTL,
+      glowStyle2: styles.cornerGlowTL,
+      borderStyle: { borderTopWidth: CORNER_THICKNESS, borderLeftWidth: CORNER_THICKNESS, borderTopLeftRadius: 3 },
+    },
+    {
+      wrapStyle: styles.cornerTR,
+      glowStyle2: styles.cornerGlowTR,
+      borderStyle: { borderTopWidth: CORNER_THICKNESS, borderRightWidth: CORNER_THICKNESS, borderTopRightRadius: 3 },
+    },
+    {
+      wrapStyle: styles.cornerBL,
+      glowStyle2: styles.cornerGlowBL,
+      borderStyle: { borderBottomWidth: CORNER_THICKNESS, borderLeftWidth: CORNER_THICKNESS, borderBottomLeftRadius: 3 },
+    },
+    {
+      wrapStyle: styles.cornerBR,
+      glowStyle2: styles.cornerGlowBR,
+      borderStyle: { borderBottomWidth: CORNER_THICKNESS, borderRightWidth: CORNER_THICKNESS, borderBottomRightRadius: 3 },
+    },
   ];
 
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, animStyle]} pointerEvents="none">
-      <View style={c(styles.cornerTL)} />
-      <View style={c(styles.cornerTR)} />
-      <View style={c(styles.cornerBL)} />
-      <View style={c(styles.cornerBR)} />
+    <Animated.View style={[StyleSheet.absoluteFill, containerStyle]} pointerEvents="none">
+      {CORNERS.map((c, i) => (
+        <View key={i} style={[styles.cornerWrapper, c.wrapStyle]}>
+          <Animated.View
+            style={[
+              styles.cornerGlow,
+              c.glowStyle2,
+              glowStyle,
+              { shadowColor: glowColor, borderColor: glowColor },
+            ]}
+          />
+          <View style={[styles.corner, { borderColor }, c.borderStyle]} />
+        </View>
+      ))}
     </Animated.View>
   );
 }
@@ -255,6 +317,11 @@ export default function ScanScreen() {
 
       // Differentiated haptic: WiFi = notification, barcode = double, QR = single
       triggerHapticForCode(type, data);
+
+      // Differentiated sound: WiFi = ascending chime, barcode = double click, QR = sharp beep
+      const isWiFiScan = data.toUpperCase().startsWith('WIFI:');
+      const isBarcodeType = BARCODE_TYPES.has(type.toLowerCase());
+      SoundManager.play(isWiFiScan ? 'wifi' : isBarcodeType ? 'barcode' : 'qr');
 
       try {
         const item = await addItem({
@@ -690,35 +757,73 @@ const styles = StyleSheet.create({
   },
 
   // Corner markers
+  cornerWrapper: {
+    position: 'absolute',
+    width: CORNER_SIZE,
+    height: CORNER_SIZE,
+  },
+  cornerTL: { top: 0, left: 0 },
+  cornerTR: { top: 0, right: 0 },
+  cornerBL: { bottom: 0, left: 0 },
+  cornerBR: { bottom: 0, right: 0 },
   corner: {
     position: 'absolute',
     width: CORNER_SIZE,
     height: CORNER_SIZE,
   },
-  cornerTL: {
-    top: 0,
-    left: 0,
+  // Glow halo — same shape as corner, slightly larger, blurred via shadow
+  cornerGlow: {
+    position: 'absolute',
+    width: CORNER_SIZE + 6,
+    height: CORNER_SIZE + 6,
+    top: -3,
+    left: -3,
+    borderWidth: CORNER_THICKNESS + 1,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 0,
+  },
+  cornerGlowTL: {
+    borderTopLeftRadius: 5,
+    borderRightColor: 'transparent',
+    borderBottomColor: 'transparent',
+  },
+  cornerGlowTR: {
+    borderTopRightRadius: 5,
+    borderLeftColor: 'transparent',
+    borderBottomColor: 'transparent',
+  },
+  cornerGlowBL: {
+    borderBottomLeftRadius: 5,
+    borderRightColor: 'transparent',
+    borderTopColor: 'transparent',
+  },
+  cornerGlowBR: {
+    borderBottomRightRadius: 5,
+    borderLeftColor: 'transparent',
+    borderTopColor: 'transparent',
+  },
+  cornerTLBorder: {
+    top: 0, left: 0,
     borderTopWidth: CORNER_THICKNESS,
     borderLeftWidth: CORNER_THICKNESS,
     borderTopLeftRadius: 3,
   },
-  cornerTR: {
-    top: 0,
-    right: 0,
+  cornerTRBorder: {
+    top: 0, right: 0,
     borderTopWidth: CORNER_THICKNESS,
     borderRightWidth: CORNER_THICKNESS,
     borderTopRightRadius: 3,
   },
-  cornerBL: {
-    bottom: 0,
-    left: 0,
+  cornerBLBorder: {
+    bottom: 0, left: 0,
     borderBottomWidth: CORNER_THICKNESS,
     borderLeftWidth: CORNER_THICKNESS,
     borderBottomLeftRadius: 3,
   },
-  cornerBR: {
-    bottom: 0,
-    right: 0,
+  cornerBRBorder: {
+    bottom: 0, right: 0,
     borderBottomWidth: CORNER_THICKNESS,
     borderRightWidth: CORNER_THICKNESS,
     borderBottomRightRadius: 3,
