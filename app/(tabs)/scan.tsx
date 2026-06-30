@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { CameraView, useCameraPermissions, CameraType } from 'expo-camera';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -59,7 +60,20 @@ function ScanLine() {
 
   return (
     <Animated.View style={[styles.scanLine, style]} pointerEvents="none">
-      <View style={styles.scanLineInner} />
+      {/* Gradient beam: transparent → green → transparent */}
+      <LinearGradient
+        colors={['transparent', Colors.primary, 'transparent']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.scanLineGradient}
+      />
+      {/* Soft glow bloom below the beam */}
+      <LinearGradient
+        colors={[Colors.primary + '55', 'transparent']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={styles.scanLineGlow}
+      />
     </Animated.View>
   );
 }
@@ -657,19 +671,22 @@ const styles = StyleSheet.create({
     top: 2,
     left: 0,
     right: 0,
-    height: 3,
+    height: 18,   // tall enough to contain beam + glow bloom
     zIndex: 2,
   },
-  scanLineInner: {
-    height: 2,
-    marginHorizontal: 4,
-    borderRadius: 1,
-    backgroundColor: Colors.primary,
+  scanLineGradient: {
+    height: 2.5,
+    borderRadius: 2,
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  scanLineGlow: {
+    height: 14,
+    marginTop: 0,
+    borderRadius: 4,
   },
 
   // Corner markers
